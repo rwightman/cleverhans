@@ -16,10 +16,13 @@ MAX_EPSILON=16
 # Prepare working directory and copy all necessary files.
 # In particular copy attacks defenses and dataset, so originals won't
 # be overwritten.
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-    WORKING_DIR="/private"$(mktemp -d)
-else
-    WORKING_DIR=$(mktemp -d)
+WORKING_DIR=$1
+if [[ ! -d $WORKING_DIR ]]; then
+    if [[ "${OSTYPE}" == "darwin"* ]]; then
+        WORKING_DIR="/private"$(mktemp -d)
+    else
+        WORKING_DIR=$(mktemp -d)
+    fi
 fi
 echo "Preparing working directory: ${WORKING_DIR}"
 mkdir "${WORKING_DIR}/attacks"
@@ -44,6 +47,7 @@ python "${SCRIPT_DIR}/run_attacks_and_defenses.py" \
   --dataset_metadata="${WORKING_DIR}/dataset.csv" \
   --output_dir="${WORKING_DIR}/output_dir" \
   --epsilon="${MAX_EPSILON}" \
+  --gpu \
   --save_all_classification
 
 echo "Output is saved in directory '${WORKING_DIR}/output_dir'"

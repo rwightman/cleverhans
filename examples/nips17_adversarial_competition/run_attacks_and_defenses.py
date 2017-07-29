@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import numpy as np
+import time
 from PIL import Image
 
 
@@ -83,8 +84,8 @@ class Attack(Submission):
       epsilon: maximum allowed size of adversarial perturbation,
         should be in range [0, 255].
     """
-    print('Running attack ', self.name)
-    cmd = [self.docker_binary(), 'run',
+    print('\nRunning attack', self.name)
+    cmd = [self.docker_binary(), 'run', '--rm',
            '-v', '{0}:/input_images'.format(input_dir),
            '-v', '{0}:/output_images'.format(output_dir),
            '-v', '{0}:/code'.format(self.directory),
@@ -95,7 +96,10 @@ class Attack(Submission):
            '/output_images',
            str(epsilon)]
     print(' '.join(cmd))
+    start = time.time()
     subprocess.call(cmd)
+    duration = time.time() - start
+    print('Attack {0} completed in {1} seconds'.format(self.name, duration))
 
 
 class Defense(Submission):
@@ -112,8 +116,8 @@ class Defense(Submission):
       input_dir: directory with input (adversarial images).
       output_dir: directory to write output (classification result).
     """
-    print('Running defense ', self.name)
-    cmd = [self.docker_binary(), 'run',
+    print('\nRunning defense', self.name)
+    cmd = [self.docker_binary(), 'run', '--rm',
            '-v', '{0}:/input_images'.format(input_dir),
            '-v', '{0}:/output_data'.format(output_dir),
            '-v', '{0}:/code'.format(self.directory),
@@ -123,8 +127,10 @@ class Defense(Submission):
            '/input_images',
            '/output_data/result.csv']
     print(' '.join(cmd))
+    start = time.time()
     subprocess.call(cmd)
-
+    duration = time.time() - start
+    print('Defense {0} completed in {1} seconds'.format(self.name, duration))
 
 def read_submissions_from_directory(dirname, use_gpu):
   """Scans directory and read all submissions.
